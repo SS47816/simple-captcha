@@ -46,6 +46,19 @@ class Captcha(object):
         return
 
     def _load_train_dataset(self, data_folder: str):
+        """
+        Load the training dataset from the specified folder.
+
+        This method reads image files from the 'input' subfolder and their corresponding
+        label files from the 'output' subfolder. It populates the _train_dataset
+        dictionary with image-label pairs.
+
+        Args:
+            data_folder (str): The path to the folder containing 'input' and 'output' subfolders.
+
+        Returns:
+            None
+        """
         input_path = Path(data_folder).joinpath("input")
         label_path = Path(data_folder).joinpath("output")
 
@@ -71,7 +84,23 @@ class Captcha(object):
 
         return
 
-    def _extract_templates(self, output_folder="./data/template/", save_imgs=False):
+    def _extract_templates(self, output_folder: str="./data/template/", save_imgs: bool=False):
+        """
+        Extract and create averaged templates for each character from the training dataset.
+
+        This method processes the training dataset to create averaged templates for each unique
+        character. It thresholds each image, crops characters based on predefined bounding boxes,
+        and accumulates them to create an average template for each character.
+
+        Args:
+            output_folder (str): The path where template images will be saved if save_imgs is True.
+                                 Defaults to "./data/template/".
+            save_imgs (bool): If True, saves the generated templates as image files.
+                              Defaults to False.
+
+        Returns:
+            None
+        """
         output_path = Path(output_folder)
         output_path.mkdir(parents=True, exist_ok=True)
 
