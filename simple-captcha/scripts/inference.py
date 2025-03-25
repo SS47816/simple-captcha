@@ -4,20 +4,17 @@ import cv2
 import numpy as np
 
 
-def extract_templates(bboxes, num_chars=5, input_folder="./data/input/", label_folder="./data/output/", output_folder="./data/template/", save_imgs=False):
-    input_path = Path(input_folder)
-    label_path = Path(label_folder)
-    output_path = Path(output_folder)
-    output_path.mkdir(parents=True, exist_ok=True)
+def load_dataset(data_folder="./data"):
+    input_path = Path(data_folder).joinpath("input")
+    label_path = Path(data_folder).joinpath("output")
 
-    # Dictionary to store accumulated templates and counts
-    templates = {}
-    template_counts = {}
+    dataset = {}
 
     # Get all .jpg files in the folder
     image_files = list(input_path.glob("*.jpg"))
 
     for image_path in image_files:
+        key = image_path.stem
         new_stem = image_path.stem.replace("input", "output")
         label_file = label_path / (new_stem + ".txt")
 
@@ -25,20 +22,29 @@ def extract_templates(bboxes, num_chars=5, input_folder="./data/input/", label_f
         if label_file.exists():
             with open(label_file, "r") as f:
                 labels = f.read().strip()
-
-            if len(labels) != num_chars:
-                print(f"Warning: Label file {label_file} does not have exactly {num_chars} characters.")
-                continue
         else:
             print(f"Warning: Label file {label_file} not found.")
             continue
 
         image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
-        _, thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        dataset[key] = (image, labels)
+
+    return dataset
+
+def extract_templates(dataset, bboxes, output_folder="./data/template/", save_imgs=False):
+    output_path = Path(output_folder)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Dictionary to store accumulated templates and counts
+    templates = {}
+    template_counts = {}
+    for key, (image, labels) in dataset.items():
+
+        _, image_thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
         # Process each bounding box and corresponding character label
         for i, (x, y, w, h) in enumerate(bboxes):
-            char_crop = thresh[y:y+h, x:x+w].astype(np.float32)
+            char_crop = image_thresh[y:y+h, x:x+w].astype(np.float32)
             label = labels[i]
 
             if label not in templates:
@@ -101,7 +107,8 @@ def main():
     bboxes = [(5 + 9*i, 11, 8, 10) for i in range(5)]
     num_chars = 5
 
-    templates = extract_templates(bboxes, num_chars, save_imgs=True)
+    dataset_train = load_dataset("./data")
+    templates = extract_templates(dataset_train, bboxes, output_folder="./data/template/", save_imgs=False)
     identify_captcha(templates, bboxes)
 
 if __name__ == "__main__":
