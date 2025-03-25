@@ -34,7 +34,7 @@ class TestCaptcha(unittest.TestCase):
                     preds = f.read().strip()
                 results[im_path.stem] = 1 if preds == labels else 0
             else:
-                print(f"Warning: Label file {label_file} not found.")
+                # print(f"Warning: Label file {label_file} not provided, skipped this data.")
                 continue
 
         correct = sum(1 for value in results.values() if value == 1)

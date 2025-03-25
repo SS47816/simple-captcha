@@ -76,7 +76,7 @@ class Captcha(object):
                 with open(label_file, "r") as f:
                     labels = f.read().strip()
             else:
-                print(f"Warning: Label file {label_file} not found.")
+                # print(f"Warning: Label file {label_file} not provided, skipped this data.")
                 continue
 
             image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
