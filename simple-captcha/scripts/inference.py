@@ -4,14 +4,11 @@ import cv2
 import numpy as np
 
 
-def extract_templates(input_folder="./data/input/", label_folder="./data/output/", output_folder="./data/template/", num_chars=5, save_imgs=False):
+def extract_templates(bboxes, num_chars=5, input_folder="./data/input/", label_folder="./data/output/", output_folder="./data/template/", save_imgs=False):
     input_path = Path(input_folder)
     label_path = Path(label_folder)
     output_path = Path(output_folder)
     output_path.mkdir(parents=True, exist_ok=True)
-
-    # Define fixed bounding boxes (x, y, width, height)
-    bboxes = [(5 + 9*i, 11, 8, 10) for i in range(5)]
 
     # Dictionary to store accumulated templates and counts
     templates = {}
@@ -63,9 +60,49 @@ def extract_templates(input_folder="./data/input/", label_folder="./data/output/
     return templates
 
 
+def identify_captcha(templates, bboxes, input_folder="./data/input/", output_folder="./data/prediction/"):
+    input_path = Path(input_folder)
+    output_path = Path(output_folder)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Get all .jpg files in the folder
+    image_files = list(input_path.glob("*.jpg"))
+
+    for image_path in image_files:
+        image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
+        _, thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+
+        identified_chars = []
+        # Process each bounding box and match with templates
+        for i, (x, y, w, h) in enumerate(bboxes):
+            char_crop = thresh[y:y+h, x:x+w]
+            best_match_label = None
+            matching_scores = {}
+            # Compare cropped character with each template
+            for label, template in templates.items():
+                result = cv2.matchTemplate(char_crop, template, cv2.TM_CCOEFF_NORMED)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                matching_scores[label] = max_val
+
+            # Append the identified label for the character
+            best_match_label = max(matching_scores, key=matching_scores.get)
+            identified_chars.append(best_match_label)
+
+        # Save identified characters in a text file
+        output_file = output_path / (image_path.stem + ".txt")
+        with open(str(output_file), "w") as f:
+            f.write("".join(identified_chars))
+
+    print(f"Prediction results saved in {output_folder}")
+
+
 def main():
-    extract_templates()
-    # match_captcha()
+    # Define fixed bounding boxes (x, y, width, height)
+    bboxes = [(5 + 9*i, 11, 8, 10) for i in range(5)]
+    num_chars = 5
+
+    templates = extract_templates(bboxes, num_chars, save_imgs=True)
+    identify_captcha(templates, bboxes)
 
 if __name__ == "__main__":
     main()
