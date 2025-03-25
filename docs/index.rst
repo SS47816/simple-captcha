@@ -2,13 +2,13 @@
    :hidden:
    :maxdepth: 1
 
-   api/DriveELO
+   api/simple-captcha
    License <license>
 
-DriveELO
+simple-captcha
 ===============================
 
-DriveELO: Generating Diverse and Realistic Driving Scenarios from Scratch
+simple-captcha: Generating Diverse and Realistic Driving Scenarios from Scratch
 
 
 Indices and tables

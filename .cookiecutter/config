@@ -1,5 +1,5 @@
 # Change these at your peril:
-export PROJECT_NAME=DriveELO
-export REPO_NAME=DriveELO
-export DESCRIPTION=DriveELO: Generating Diverse and Realistic Driving Scenarios from Scratch
+export PROJECT_NAME=simple-captcha
+export REPO_NAME=simple-captcha
+export DESCRIPTION=simple-captcha: Generating Diverse and Realistic Driving Scenarios from Scratch
 export PROJECT_OPENNESS=private

@@ -1,4 +1,4 @@
-"""DriveELO"""
+"""simple-captcha"""
 
 import logging
 import logging.config
