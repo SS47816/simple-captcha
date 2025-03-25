@@ -1,24 +1,6 @@
-# AI-ELO
+# simple-captcha
 
-<!-- **[[Paper](https://arxiv.org/abs/2309.14685)] [[Project Page](https://ss47816.github.io/DriveSceneGen/)] [[Code](https://github.com/SS47816/DriveSceneGen)]** -->
-
-#### (Let's find a better name ~~)
-
-## AI-ELO: An Unified Framework for Modelling Generic Task Difficulties, AI and Human Performances
-
-**[[Paper Draft](https://drive.google.com/file/d/1W6GFEvtZCEyVzD9KfY3M6Rr7Dtgxy_Ff/view?usp=sharing)] [[Project Google Drive](https://drive.google.com/drive/folders/1gNlDmO09IeKzWnpS1v2s0EK806-afbAD?usp=sharing)] [[Code](https://github.com/SS47816/simple-captcha)]**
-
-![Alt text](media/Glicko_dist_1.png)
-
-<!-- _Shuo Sun<sup>†</sup>, Zekai Gu<sup>†</sup>, Tianchen Sun<sup>†</sup>, Jiawei Sun, Chengran Yuan, Yuhang Han, Dongen Li, and Marcelo H. Ang Jr._ -->
-
-<!-- _Advanced Robotics Centre, National University of Singapore_ -->
-
-<!-- _<sup>†</sup>Indicates Equal Contribution_ -->
-
-<!-- ## Abstract
-
-> Realistic and diverse traffic scenarios in large quantities are crucial for the development and validation of autonomous driving systems. However, owing to numerous difficulties in the data collection process and the reliance on intensive annotations, real-world datasets lack sufficient quantity and diversity to support the increasing demand for data. This work introduces DriveSceneGen, a data-driven driving scenario generation method that learns from the real-world driving dataset and generates entire dynamic driving scenarios from scratch. Experimental results on 5k generated scenarios highlight that DriveSceneGen is able to generate novel driving scenarios that align with real-world data distributions with high fidelity and diversity. To the best of our knowledge, DriveSceneGen is the first method that generates novel driving scenarios involving both static map elements and dynamic traffic participants from scratch. Extensive experiments demonstrate that our two-stage method outperforms existing state-of-the-art map generation methods and trajectory simulation methods on their respective tasks. -->
+![Alt text](data/input/input00.jpg) ![Alt text](data/input/input01.jpg) ![Alt text](data/input/input02.jpg) ![Alt text](data/input/input03.jpg) ![Alt text](data/input/input04.jpg) ![Alt text](data/input/input05.jpg)
 
 ## Install
 
@@ -40,128 +22,42 @@ conda activate simple-captcha
 make pip-install
 ```
 
-## CV Tasks
+## Usage
 
-### Classification on ImageNet Dataset
+```bash
+# Run single inference on the `./data/input/input100.jpg`
+python3 simple-captcha/scripts/demo.py
 
-1. Download the official [ImageNet Large-scale Visual Recognition Challenge (ILSVRC) 2012](https://www.image-net.org/download-images.php)
+# or optionally you can change the input/output paths
+python3 simple-captcha/scripts/demo.py --im_path <YOUR_IMAGE_FILE> --save_path <YOUR_TXT_FILE>
 
-2. Organize the ImageNet dataset into the following structure:
+# Run all inference on all images in `./data/input/` (as a test)
+python3 simple-captcha/test/captcha.test.py
+```
 
-   ```
-   ImageNet/
-   ├── imagenet_class_index.json
-   │
-   ├── train/
-   │   ├── n01440764/  # Class: Tench
-   │   │   ├── image1.jpg
-   │   │   ├── image2.jpg
-   │   │   ├── ...
-   │   ├── n02102040/  # Class: English Springer
-   │   │   ├── image1.jpg
-   │   │   ├── image2.jpg
-   │   │   ├── ...
-   │   ├── ...
-   │
-   ├── val/
-   │   ├── n01440764/  # Class: Tench
-   │   │   ├── image1.jpg
-   │   │   ├── image2.jpg
-   │   │   ├── ...
-   │   ├── n02102040/  # Class: English Springer
-   │   │   ├── image1.jpg
-   │   │   ├── image2.jpg
-   │   │   ├── ...
-   │   ├── ...
-   ```
+## General Idea
 
-3. Run Inference & Rating Estimation
+Based on the problem description, a simple conventional template matching approach is adopted for the problem for the following reasons:
 
-   ```bash
-   python3 simple-captcha/pipeline/classification.py --dataset_path <YOUR_IMAGENET_LOCATION>
-   ```
+- The number of characters and their sizes, locations, and spacings are all fixed. --> We can mannually locate the bounding box of each character and crop them.
+- The font is fixed and there is no skew --> The look of each character is mostly unchanged across different images --> We can create a simple template for each character.
+- The background and foreground colors, textures remain largely the same. --> Maybe we can "minus" these distracting factors for all images if needed (although eventually I didn't use this as the results are already quite accurate, the backgrounds/foregrounds are mostly removed during thresholding)
+- The number of sample data provided is very limited (only 25 samples), may not be sufficient to train/finetune a model up to near 100% accuracy.
 
-### Object Detection on COCO 2017 Dataset
+Considering the above factors, I decided to use a template matching algorithm to solve the problem:
 
-1. Download the official [COCO 2017 Dataset](https://cocodataset.org/#download)
+1. Assemble the sample training images and labels into a customized training dataset
+2. Manually define the bounding box of each character in the training image
+3. Extract the templates for all characters (`0`-`9`, `A`-`Z`) into a dictionary
+   - For multiple occurcances of the same characters in the training set, the average image is taken as the template
+4. On a test image, match this dictionary of templates to each bounding box location, and record their matching scores
+5. Take the template with the max score as the best match
+6. Collect all 5 predicted characters in the same image and save to a `.txt` file
 
-2. Organize the COCO dataset into the following structure:
-
-   ```
-   COCO/
-   ├── annotations/
-   │   ├── instances_train2017.json  # Object detection annotations for training
-   │   ├── instances_val2017.json    # Object detection annotations for validation
-   │   ├── captions_train2017.json   # Image captions for training
-   │   ├── captions_val2017.json     # Image captions for validation
-   │   ├── person_keypoints_train2017.json  # Keypoints for human pose estimation
-   │   ├── person_keypoints_val2017.json    # Keypoints for validation
-   │   ├── ...
-   │
-   ├── train2017/  # Training images
-   │   ├── 000000000001.jpg
-   │   ├── 000000000002.jpg
-   │   ├── ...
-   │
-   ├── val2017/  # Validation images
-   │   ├── 000000000101.jpg
-   │   ├── 000000000102.jpg
-   │   ├── ...
-   │
-   ├── test2017/  # Test images (without annotations)
-   │   ├── 000000001001.jpg
-   │   ├── 000000001002.jpg
-   │   ├── ...
-   ├── coco_labels.txt  # List of COCO class labels
-   ├── coco_classes.json  # Mapping of class IDs to class names
-   ├── README.md  # Dataset description and usage instructions
-   ```
-
-3. Run Inference & Rating Estimation
-
-   ```bash
-   python3 simple-captcha/pipeline/classification.py
-   ```
-
-## NLP Tasks
-
-### Qustion Answering on MMLU Dataset
-
-1. Run Inference & Rating Estimation
-
-   ```bash
-   python3 simple-captcha/pipeline/question_answering.py
-   ```
-
-### Math/Coding on ??? Dataset
-
-1. TODO:
-
-## Autonomous Driving Tasks
-
-### Motion Prediction on Waymo Dataset
-
-1. TODO:
-
-### Motion Planning on NAVSIM Dataset
-
-1. TODO:
-
-<!-- ## BibTeX
-
-If you find our work interesting, please consider citing our paper:
-
-    @misc{sun2023drivescenegen,
-        title={DriveSceneGen: Generating Diverse and Realistic Driving Scenarios from Scratch},
-        author={Shuo Sun and Zekai Gu and Tianchen Sun and Jiawei Sun and Chengran Yuan and Yuhang Han and Dongen Li and Marcelo H. Ang Jr au2},
-        year={2023},
-        eprint={2309.14685},
-        archivePrefix={arXiv},
-        primaryClass={cs.RO}
-    } -->
+The details are implemented in `simple-captcha/pipeline/captcha.py`
 
 ## License
 
-This repository is licensed under the [Apache License 2.0](https://github.com/SS47816/DriveSceneGen/blob/main/LICENSE)
+This repository is licensed under the [MIT License](https://github.com/SS47816/simple-captcha/blob/master/LICENSE)
 
 <small><p>Project based on <a target="_blank" href="https://github.com/nestauk/ds-cookiecutter">Nesta's data science project template</a>
