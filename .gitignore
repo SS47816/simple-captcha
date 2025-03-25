@@ -1,6 +1,6 @@
 # Data
-data/
-outputs/
+# data/
+# outputs/
 
 .recipes/
 .cookiecutter/state/
