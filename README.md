@@ -6,7 +6,7 @@
 
 ## AI-ELO: An Unified Framework for Modelling Generic Task Difficulties, AI and Human Performances
 
-**[[Paper Draft](https://drive.google.com/file/d/1W6GFEvtZCEyVzD9KfY3M6Rr7Dtgxy_Ff/view?usp=sharing)] [[Project Google Drive](https://drive.google.com/drive/folders/1gNlDmO09IeKzWnpS1v2s0EK806-afbAD?usp=sharing)] [[Code](https://github.com/SS47816/DriveELO)]**
+**[[Paper Draft](https://drive.google.com/file/d/1W6GFEvtZCEyVzD9KfY3M6Rr7Dtgxy_Ff/view?usp=sharing)] [[Project Google Drive](https://drive.google.com/drive/folders/1gNlDmO09IeKzWnpS1v2s0EK806-afbAD?usp=sharing)] [[Code](https://github.com/SS47816/simple-captcha)]**
 
 ![Alt text](media/Glicko_dist_1.png)
 
@@ -25,16 +25,16 @@
 1. Clone this repository
 
 ```bash
-git clone https://github.com/SS47816/DriveELO.git
-cd DriveELO
+git clone https://github.com/SS47816/simple-captcha.git
+cd simple-captcha
 ```
 
 2. Install all Dependencies
 
 ```bash
-# Auto install conda env DriveELO
+# Auto install conda env simple-captcha
 make install
-conda activate DriveELO
+conda activate simple-captcha
 
 # Auto install all pip dependencies from requirements.txt
 make pip-install
@@ -78,7 +78,7 @@ make pip-install
 3. Run Inference & Rating Estimation
 
    ```bash
-   python3 DriveELO/pipeline/classification.py --dataset_path <YOUR_IMAGENET_LOCATION>
+   python3 simple-captcha/pipeline/classification.py --dataset_path <YOUR_IMAGENET_LOCATION>
    ```
 
 ### Object Detection on COCO 2017 Dataset
@@ -120,7 +120,7 @@ make pip-install
 3. Run Inference & Rating Estimation
 
    ```bash
-   python3 DriveELO/pipeline/classification.py
+   python3 simple-captcha/pipeline/classification.py
    ```
 
 ## NLP Tasks
@@ -130,7 +130,7 @@ make pip-install
 1. Run Inference & Rating Estimation
 
    ```bash
-   python3 DriveELO/pipeline/question_answering.py
+   python3 simple-captcha/pipeline/question_answering.py
    ```
 
 ### Math/Coding on ??? Dataset
