@@ -43,6 +43,8 @@ Based on the problem description, a simple conventional template matching approa
 - The font is fixed and there is no skew --> The look of each character is mostly unchanged across different images --> We can create a simple template for each character.
 - The background and foreground colors, textures remain largely the same. --> Maybe we can "minus" these distracting factors for all images if needed (although eventually I didn't use this as the results are already quite accurate, the backgrounds/foregrounds are mostly removed during thresholding)
 - The number of sample data provided is very limited (only 25 samples), may not be sufficient to train/finetune a model up to near 100% accuracy.
+  - We can design a simple CNN model here to classify/detect the characters. But it may need additional data and may not perform as consistently as a simple conventional approach.
+  - A simple template matching algorithm hand-crafted for this task can be faster to implement and achieves near 100% accuracy
 
 Considering the above factors, I decided to use a template matching algorithm to solve the problem:
 
